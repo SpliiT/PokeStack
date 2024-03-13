@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suika game - SpliiT</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+</head>
+<body>
+  <div class="container">
+    <div id="game-canvas">
+      <div id="game-ui">
+        <p id="game-score"></p>
+
+        <div id="game-end-container">
+          <div id="game-end">
+            <div id="game-end-title">Game Over!</div>
+            <a id="game-end-link" href="">Try Again</a>
+          </div>
+        </div>
+
+        <div id="game-status">
+          <div class="game-status-item">
+            <div class="game-status-label">Meilleur Score :</div>
+            <div id="game-highscore-value">0</div>
+          </div>
+          <div class="game-status-item">
+            <div class="game-status-label">Prochaine Ball : </div>
+            <img id="game-next-ball" src="./assets/img/circle0.png" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript" src="js/matter.js"></script>
+  <script type="text/javascript" src="js/index.js"></script>
+</body>
+</html>
