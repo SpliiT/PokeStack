@@ -162,3 +162,20 @@ canvas {
   width: 30px;
   height: 30px;
 }
+
+#start-a-game {
+  display: inline-block;
+  color: var(--col-white);
+  font-size: 24px;
+  text-decoration: none;
+  background-color: var(--col-primary-light);
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--col-shadow);
+}
+
+#start-a-game:hover {
+  background-color: var(--col-primary);
+  box-shadow: 6px 6px 0 var(--col-shadow);
+}
