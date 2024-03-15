@@ -393,31 +393,31 @@ Game.initGame();
 
 // Redimensionner le canvas en fonction de la taille de l'écran
 const resizeCanvas = () => {
-	const screenWidth = document.body.clientWidth;
-	const screenHeight = document.body.clientHeight;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
 
-	let newWidth = Game.width;
-	let newHeight = Game.height;
-	let scaleUI = 1;
+    const aspectRatio = Game.width / Game.height;
 
-	if (screenWidth * 1.5 > screenHeight) {
-		newHeight = Math.min(Game.height, screenHeight);
-		newWidth = newHeight / 1.5;
-		scaleUI = newHeight / Game.height;
-	} else {
-		newWidth = Math.min(Game.width, screenWidth);
-		newHeight = newWidth * 1.5;
-		scaleUI = newWidth / Game.width;
-	}
+    let newWidth = screenWidth;
+    let newHeight = screenHeight;
 
-	render.canvas.style.width = `${newWidth}px`;
-	render.canvas.style.height = `${newHeight}px`;
+    // Si l'écran est plus large que la hauteur du canvas
+    if (screenWidth / screenHeight > aspectRatio) {
+        newWidth = screenHeight * aspectRatio;
+    } else { // Si l'écran est plus haut que la largeur du canvas
+        newHeight = screenWidth / aspectRatio;
+    }
 
-	Game.elements.ui.style.width = `${Game.width}px`;
-	Game.elements.ui.style.height = `${Game.height}px`;
-	Game.elements.ui.style.transform = `scale(${scaleUI})`;
+    render.canvas.style.width = `${newWidth}px`;
+    render.canvas.style.height = `${newHeight}px`;
+    // Mettre à jour l'UI
+    const scaleUI = newWidth / Game.width;
+    Game.elements.ui.style.width = `${Game.width}px`;
+    Game.elements.ui.style.height = `${Game.height}px`;
+    Game.elements.ui.style.transform = `scale(${scaleUI})`;
 };
 
 // Appeler la fonction de redimensionnement lors du chargement et du redimensionnement de la page
-document.body.onload = resizeCanvas;
-document.body.onresize = resizeCanvas;
+window.addEventListener('resize', resizeCanvas);
+document.addEventListener('DOMContentLoaded', resizeCanvas);
+
