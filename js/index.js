@@ -225,7 +225,7 @@ const Game = {
             if (ballsBelowBar.has(bodyA) || ballsBelowBar.has(bodyB)) {
               Game.loseGame();
             }
-          }, 3000); // Délai de 3 secondes
+          }, 1000); // Délai de 3 secondes
         }
 
         // Ignorer si les tailles sont différentes
