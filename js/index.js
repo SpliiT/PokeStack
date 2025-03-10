@@ -201,6 +201,9 @@ const Game = {
       Game.elements.previewBall.position.x = e.mouse.position.x;
     });
 
+    // Ajouter un ensemble pour suivre les balles qui ont franchi la barre
+    let ballsBelowBar = new Set();
+
     Events.on(engine, "collisionStart", function (e) {
       for (let i = 0; i < e.pairs.length; i++) {
         const { bodyA, bodyB } = e.pairs[i];
@@ -211,10 +214,18 @@ const Game = {
         const aY = bodyA.position.y + bodyA.circleRadius;
         const bY = bodyB.position.y + bodyB.circleRadius;
 
-        // Oh non, trop haut !
+        // Vérifier si une balle a franchi la barre
         if (aY < loseHeight || bY < loseHeight) {
-          Game.loseGame();
-          return;
+          // Ajouter la balle à l'ensemble des balles qui ont franchi la barre
+          ballsBelowBar.add(bodyA);
+          ballsBelowBar.add(bodyB);
+
+          // Déclencher la vérification de la défaite après un délai
+          setTimeout(() => {
+            if (ballsBelowBar.has(bodyA) || ballsBelowBar.has(bodyB)) {
+              Game.loseGame();
+            }
+          }, 3000); // Délai de 3 secondes
         }
 
         // Ignorer si les tailles sont différentes
@@ -249,6 +260,10 @@ const Game = {
         );
         Game.addPop(midPosX, midPosY, bodyA.circleRadius);
         Game.calculateScore();
+
+        // Supprimer les balles de l'ensemble si elles ont fusionné
+        ballsBelowBar.delete(bodyA);
+        ballsBelowBar.delete(bodyB);
       }
     });
   },
@@ -280,6 +295,9 @@ const Game = {
     Game.elements.end.style.display = "flex";
     runner.enabled = false;
     Game.saveHighscore();
+
+    // Réinitialiser l'ensemble des balles qui ont franchi la barre
+    ballsBelowBar.clear();
   },
 
   // Trouver l'indice d'un ball en fonction de son rayon
@@ -479,21 +497,22 @@ const resizeCanvas = () => {
   let newWidth = screenWidth;
   let newHeight = screenHeight;
 
-  // Si l'écran est plus large que la hauteur du canvas
   if (screenWidth / screenHeight > aspectRatio) {
     newWidth = screenHeight * aspectRatio;
   } else {
-    // Si l'écran est plus haut que la largeur du canvas
     newHeight = screenWidth / aspectRatio;
   }
 
   render.canvas.style.width = `${newWidth}px`;
   render.canvas.style.height = `${newHeight}px`;
-  // Mettre à jour l'UI
+
   const scaleUI = newWidth / Game.width;
   Game.elements.ui.style.width = `${Game.width}px`;
   Game.elements.ui.style.height = `${Game.height}px`;
   Game.elements.ui.style.transform = `scale(${scaleUI})`;
+
+  // Ajoutez une animation pour le redimensionnement
+  Game.elements.ui.style.transition = "transform 0.3s ease";
 };
 
 // Appeler la fonction de redimensionnement lors du chargement et du redimensionnement de la page

@@ -1,15 +1,15 @@
 @font-face {
-  font-family: 'Pokemon';
-  src: url(assets/font/Pokemon.ttf) format('truetype');
+  font-family: "Pokemon";
+  src: url(assets/font/Pokemon.ttf) format("truetype");
 }
 
 :root {
   --col-bg: white;
   --col-bg-light: red;
   --col-bg-lighter: white;
-  --col-primary: #3264AF;
-  --col-primary-dark: #FF2700;
-  --col-primary-light: #FF8800;
+  --col-primary: #3264af;
+  --col-primary-dark: #ff2700;
+  --col-primary-light: #ff8800;
   --col-shadow: rgba(0, 0, 0, 0.25);
   --col-white: #fff;
 }
@@ -20,16 +20,16 @@
   margin: 0;
   line-height: 1;
   overflow: hidden;
-  font-family: 'Pokemon', sans-serif;
+  font-family: "Pokemon", sans-serif;
 }
 
 body {
-  background-image:url(/assets/img/bg.png);
+  background-image: url(/assets/img/bg.png);
   background-size: cover;
   background-position: center center;
   background-attachment: fixed;
 
-  font-family: 'Pokemon', sans-serif;
+  font-family: "Pokemon", sans-serif;
   background-size: cover;
   background-repeat: no-repeat;
   height: 100vh;
@@ -37,7 +37,7 @@ body {
   margin: 0;
   padding: 0;
   user-select: none;
-  font-family: 'Pokemon', sans-serif;
+  font-family: "Pokemon", sans-serif;
   overflow: hidden;
 }
 
@@ -52,28 +52,22 @@ body {
   justify-content: center;
 }
 
-
 canvas {
-  font-family: 'Pokemon', sans-serif;
+  font-family: "Pokemon", sans-serif;
   padding-left: 0;
   padding-right: 0;
   margin-left: auto;
   margin-right: auto;
   display: block;
-
 }
-
 
 #game-canvas {
   position: relative;
-  border: 5px solid var(--col-primary);
   box-shadow: 0 4px 32px var(--col-shadow);
-  border-radius: 32px;
   object-fit: contain;
   pointer-events: initial;
   user-select: initial;
 }
-
 
 #game-ui {
   position: absolute;
@@ -87,7 +81,7 @@ canvas {
 }
 
 #game-score {
-  font-family: 'Pokemon', sans-serif;
+  font-family: "Pokemon", sans-serif;
   position: absolute;
   width: 100%;
   border-bottom: 5px solid var(--col-primary);
@@ -95,7 +89,8 @@ canvas {
   font-weight: 900;
   padding-left: 16px;
   color: var(--col-bg-lighter);
-  text-shadow: 3px 3px 0 var(--col-primary), -3px -3px 0 var(--col-primary), -3px 3px 0 var(--col-primary), 3px -3px 0 var(--col-primary);
+  text-shadow: 3px 3px 0 var(--col-primary), -3px -3px 0 var(--col-primary),
+    -3px 3px 0 var(--col-primary), 3px -3px 0 var(--col-primary);
 }
 
 #game-end-container {
