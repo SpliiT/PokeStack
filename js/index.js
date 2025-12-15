@@ -55,8 +55,28 @@ const Game = {
     statusValue: document.getElementById("game-highscore-value"),
     nextballImg: document.getElementById("game-next-ball"),
     previewBall: null,
+    usernameModal: document.getElementById("username-modal"),
+    usernameInput: document.getElementById("username-input"),
+    usernameSubmit: document.getElementById("username-submit"),
+    usernameError: document.getElementById("username-error"),
+    modalTitle: document.getElementById("modal-title"),
+    modalSubtitle: document.getElementById("modal-subtitle"),
+    leaderboardContainer: document.getElementById("leaderboard-container"),
+    leaderboardList: document.getElementById("leaderboard-list"),
+    leaderboardBtn: document.getElementById("leaderboard-btn"),
+    closeLeaderboard: document.getElementById("close-leaderboard"),
+    viewLeaderboardBtn: document.getElementById("view-leaderboard-btn"),
+    playerName: document.getElementById("player-name"),
+    finalScore: document.getElementById("final-score"),
+    gameEndMessage: document.getElementById("game-end-message"),
+    userRank: document.getElementById("user-rank"),
   },
-  cache: { highscore: 0 },
+  cache: { 
+    highscore: 0, 
+    username: "",
+    gamesPlayed: 0,
+    leaderboard: []
+  },
   sounds: {
     click: new Audio("/assets/click.mp3"),
     pop0: new Audio("/assets/pop0.mp3"),
@@ -110,31 +130,182 @@ const Game = {
     Game.elements.nextballImg.src = `./assets/img/circle${Game.nextballSize}.png`;
   },
 
+  // ===== GESTION DU PROFIL UTILISATEUR =====
+  getUserProfile: function () {
+    const profile = localStorage.getItem("pokestack-profile");
+    if (profile === null) {
+      return null;
+    }
+    return JSON.parse(profile);
+  },
+
+  saveUserProfile: function () {
+    localStorage.setItem("pokestack-profile", JSON.stringify(Game.cache));
+  },
+
+  setUsername: function (username) {
+    Game.cache.username = username.trim();
+    Game.elements.playerName.innerText = Game.cache.username;
+    Game.saveUserProfile();
+  },
+
+  getUsername: function () {
+    return Game.cache.username || "Joueur";
+  },
+
+  showUsernameModal: function (isNewRecord = false) {
+    if (isNewRecord) {
+      Game.elements.modalTitle.innerText = "🎉 Nouveau Record! 🎉";
+      Game.elements.modalSubtitle.innerText = "Tu as battu ton record! Entre ton pseudo:";
+    } else {
+      Game.elements.modalTitle.innerText = "Bienvenue sur PokeStack! 🏆";
+      Game.elements.modalSubtitle.innerText = "Entre ton pseudo pour commencer";
+    }
+    Game.elements.usernameModal.style.display = "flex";
+    Game.elements.usernameInput.value = Game.cache.username || "";
+    Game.elements.usernameInput.focus();
+  },
+
+  hideUsernameModal: function () {
+    Game.elements.usernameModal.style.display = "none";
+    Game.elements.usernameError.innerText = "";
+  },
+
+  // ===== GESTION DU LEADERBOARD =====
+  updateLeaderboard: function (score, username) {
+    const entry = {
+      username: username,
+      score: score,
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    // Ajouter l'entrée
+    Game.cache.leaderboard.push(entry);
+
+    // Trier par score décroissant
+    Game.cache.leaderboard.sort((a, b) => b.score - a.score);
+
+    // Garder seulement le top 10
+    Game.cache.leaderboard = Game.cache.leaderboard.slice(0, 10);
+
+    Game.saveUserProfile();
+  },
+
+  isTopScore: function (score) {
+    if (Game.cache.leaderboard.length < 10) return true;
+    return score > Game.cache.leaderboard[9].score;
+  },
+
+  getUserRank: function () {
+    const username = Game.getUsername();
+    const rank = Game.cache.leaderboard.findIndex(entry => 
+      entry.username === username && entry.score === Game.cache.highscore
+    );
+    return rank >= 0 ? rank + 1 : null;
+  },
+
+  displayLeaderboard: function () {
+    const leaderboard = Game.cache.leaderboard;
+    const currentUser = Game.getUsername();
+    
+    if (leaderboard.length === 0) {
+      Game.elements.leaderboardList.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #718096; font-size: 18px;">
+          Aucun score enregistré<br>Sois le premier! 🚀
+        </div>
+      `;
+      Game.elements.userRank.innerText = "";
+      return;
+    }
+
+    let html = "";
+    leaderboard.forEach((entry, index) => {
+      const rank = index + 1;
+      const isCurrentUser = entry.username === currentUser && entry.score === Game.cache.highscore;
+      const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
+      
+      let classes = "leaderboard-entry";
+      if (isCurrentUser) classes += " current-user";
+      else if (rank === 1) classes += " top-1";
+      else if (rank === 2) classes += " top-2";
+      else if (rank === 3) classes += " top-3";
+
+      html += `
+        <div class="${classes}">
+          <div class="leaderboard-rank">${medal}</div>
+          <div class="leaderboard-name">${entry.username}${isCurrentUser ? ' (Toi)' : ''}</div>
+          <div class="leaderboard-score">${entry.score}</div>
+        </div>
+      `;
+    });
+
+    Game.elements.leaderboardList.innerHTML = html;
+
+    // Afficher le rang de l'utilisateur
+    const userRank = Game.getUserRank();
+    if (userRank) {
+      Game.elements.userRank.innerText = `Tu es ${userRank}${userRank === 1 ? 'er' : 'ème'} au classement! 🎯`;
+    } else {
+      Game.elements.userRank.innerText = "Continue pour entrer dans le top 10!";
+    }
+  },
+
+  showLeaderboard: function () {
+    Game.displayLeaderboard();
+    Game.elements.leaderboardContainer.style.display = "flex";
+  },
+
+  hideLeaderboard: function () {
+    Game.elements.leaderboardContainer.style.display = "none";
+  },
+
   // Afficher le score le plus élevé
   showHighscore: function () {
     Game.elements.statusValue.innerText = Game.cache.highscore;
   },
-  // Charger le score le plus élevé depuis le stockage local
+
+  // Charger le profil et les données
   loadHighscore: function () {
-    const gameCache = localStorage.getItem("suika-game-cache");
-    if (gameCache === null) {
-      Game.saveHighscore();
+    const profile = Game.getUserProfile();
+    if (profile === null) {
+      // Nouveau joueur - afficher la modal de pseudo
+      Game.showUsernameModal(false);
       return;
     }
 
-    Game.cache = JSON.parse(gameCache);
+    Game.cache = profile;
     Game.showHighscore();
+    Game.elements.playerName.innerText = Game.getUsername();
   },
-  // Sauvegarder le score le plus élevé
+
+  // Sauvegarder le score et mettre à jour le leaderboard
   saveHighscore: function () {
     Game.calculateScore();
-    if (Game.score < Game.cache.highscore) return;
+    const isNewPersonalRecord = Game.score > Game.cache.highscore;
+    const isTopTenScore = Game.isTopScore(Game.score);
 
-    Game.cache.highscore = Game.score;
-    Game.showHighscore();
-    Game.elements.endTitle.innerText = "Nouveau record !";
+    if (isNewPersonalRecord) {
+      Game.cache.highscore = Game.score;
+      Game.showHighscore();
+      Game.elements.endTitle.innerText = "🎉 Nouveau Record! 🎉";
+      Game.elements.gameEndMessage.innerText = "Tu as battu ton record personnel!";
+    } else {
+      Game.elements.endTitle.innerText = "Game Over!";
+      Game.elements.gameEndMessage.innerText = "";
+    }
 
-    localStorage.setItem("suika-game-cache", JSON.stringify(Game.cache));
+    // Incrémenter le nombre de parties
+    Game.cache.gamesPlayed = (Game.cache.gamesPlayed || 0) + 1;
+
+    // Mettre à jour le leaderboard si c'est un top score
+    if (isTopTenScore) {
+      Game.updateLeaderboard(Game.score, Game.getUsername());
+    }
+
+    // Afficher le score final
+    Game.elements.finalScore.innerText = Game.score;
+
+    Game.saveUserProfile();
   },
 
   // Initialiser le jeu
@@ -518,3 +689,57 @@ const resizeCanvas = () => {
 // Appeler la fonction de redimensionnement lors du chargement et du redimensionnement de la page
 window.addEventListener("resize", resizeCanvas);
 document.addEventListener("DOMContentLoaded", resizeCanvas);
+
+// ===== EVENT LISTENERS POUR LE LEADERBOARD ET USERNAME =====
+
+// Soumission du pseudo (bouton)
+Game.elements.usernameSubmit.addEventListener("click", function () {
+  const username = Game.elements.usernameInput.value.trim();
+  
+  if (username.length === 0) {
+    Game.elements.usernameError.innerText = "Entre un pseudo!";
+    return;
+  }
+  
+  if (username.length < 2) {
+    Game.elements.usernameError.innerText = "Minimum 2 caractères";
+    return;
+  }
+  
+  Game.setUsername(username);
+  Game.hideUsernameModal();
+  
+  // Si c'est la première fois, initialiser le highscore
+  if (Game.cache.highscore === 0) {
+    Game.saveUserProfile();
+  }
+});
+
+// Soumission du pseudo (touche Entrée)
+Game.elements.usernameInput.addEventListener("keypress", function (e) {
+  if (e.key === "Enter") {
+    Game.elements.usernameSubmit.click();
+  }
+});
+
+// Ouvrir le leaderboard (bouton dans le jeu)
+Game.elements.leaderboardBtn.addEventListener("click", function () {
+  Game.showLeaderboard();
+});
+
+// Ouvrir le leaderboard (bouton dans game over)
+Game.elements.viewLeaderboardBtn.addEventListener("click", function () {
+  Game.showLeaderboard();
+});
+
+// Fermer le leaderboard
+Game.elements.closeLeaderboard.addEventListener("click", function () {
+  Game.hideLeaderboard();
+});
+
+// Fermer le leaderboard en cliquant sur le fond
+Game.elements.leaderboardContainer.addEventListener("click", function (e) {
+  if (e.target === Game.elements.leaderboardContainer) {
+    Game.hideLeaderboard();
+  }
+});

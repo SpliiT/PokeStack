@@ -39,6 +39,37 @@
 
 <body>
 
+  <!-- Username Modal -->
+  <div id="username-modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Bienvenue sur PokeStack! 🏆</h2>
+        <p id="modal-subtitle">Entre ton pseudo pour commencer</p>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="username-input" placeholder="Ton pseudo..." maxlength="15" />
+        <p id="username-error" class="error-message"></p>
+      </div>
+      <div class="modal-footer">
+        <button id="username-submit" class="btn-primary">Commencer !</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Container -->
+  <div id="leaderboard-container" style="display: none;">
+    <div class="leaderboard-content">
+      <div class="leaderboard-header">
+        <h2>🏆 Top 10 Joueurs</h2>
+        <button id="close-leaderboard" class="btn-close">✕</button>
+      </div>
+      <div id="leaderboard-list"></div>
+      <div class="leaderboard-footer">
+        <p id="user-rank"></p>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <div id="game-canvas">
       <div id="game-ui">
@@ -48,19 +79,28 @@
         <div id="game-end-container">
           <div id="game-end">
             <div id="game-end-title">Game Over!</div>
-            <a id="game-end-link" href="">Try Again</a>
+            <div id="game-end-score">Score: <span id="final-score">0</span></div>
+            <div id="game-end-message"></div>
+            <a id="game-end-link" href="">Rejouer</a>
+            <button id="view-leaderboard-btn" class="btn-secondary">Voir le Classement</button>
           </div>
         </div>
 
         <div id="game-status">
           <div class="game-status-item">
-            <div class="game-status-label">Meilleur Score :</div>
+            <div class="game-status-label">
+              <span id="player-name">Joueur</span>
+            </div>
+          </div>
+          <div class="game-status-item">
+            <div class="game-status-label">Record :</div>
             <div id="game-highscore-value">0</div>
           </div>
           <div class="game-status-item">
             <div class="game-status-label">Prochaine Ball : </div>
             <img id="game-next-ball" src="./assets/img/circle0.png" />
           </div>
+          <button id="leaderboard-btn" class="btn-icon" title="Voir le classement">🏆</button>
         </div>
       </div>
     </div>
