@@ -30,9 +30,12 @@ const previewBallHeight = 32;
 const friction = {
   friction: 0.006,
   frictionStatic: 0.006,
-  frictionAir: 0,
+  frictionAir: 0.001,  // Réduit de 0 à 0.001 pour ralentir légèrement en l'air
   restitution: 0.1,
 };
+
+// Ensemble pour suivre les balles qui ont franchi la barre (global)
+let ballsBelowBar = new Set();
 
 // États possibles du jeu
 const GameStates = {
@@ -46,6 +49,8 @@ const GameStates = {
 const Game = {
   width: 640,
   height: 960,
+  originalWidth: 640,
+  originalHeight: 960,
   elements: {
     canvas: document.getElementById("game-canvas"),
     ui: document.getElementById("game-ui"),
@@ -98,13 +103,41 @@ const Game = {
   ballsMerged: [],
   // Fonction pour calculer le score en fonction des balls fusionnés
   calculateScore: function () {
-    const score = Game.ballsMerged.reduce((total, count, sizeIndex) => {
+    const newScore = Game.ballsMerged.reduce((total, count, sizeIndex) => {
       const value = Game.ballSizes[sizeIndex].scoreValue * count;
       return total + value;
     }, 0);
 
-    Game.score = score;
-    Game.elements.score.innerText = Game.score;
+    // Animate score counter
+    if (newScore !== Game.score) {
+      Game.animateScore(Game.score, newScore);
+    }
+    Game.score = newScore;
+  },
+
+  // Animate score with smooth counter
+  animateScore: function (oldScore, newScore) {
+    const duration = 500; // ms
+    const steps = 30;
+    const increment = (newScore - oldScore) / steps;
+    let currentStep = 0;
+
+    // Add pop animation
+    Game.elements.score.style.animation = 'none';
+    setTimeout(() => {
+      Game.elements.score.style.animation = '';
+    }, 10);
+
+    const interval = setInterval(() => {
+      currentStep++;
+      const displayScore = Math.round(oldScore + increment * currentStep);
+      Game.elements.score.innerText = displayScore;
+
+      if (currentStep >= steps) {
+        clearInterval(interval);
+        Game.elements.score.innerText = newScore;
+      }
+    }, duration / steps);
   },
 
   // Tableau des tailles de balls avec leurs propriétés
@@ -140,7 +173,14 @@ const Game = {
   },
 
   saveUserProfile: function () {
-    localStorage.setItem("pokestack-profile", JSON.stringify(Game.cache));
+    // On ne sauvegarde que le username et highscore en local
+    //Le leaderboard est maintenant global via Firebase
+    const localData = {
+      username: Game.cache.username,
+      highscore: Game.cache.highscore,
+      gamesPlayed: Game.cache.gamesPlayed
+    };
+    localStorage.setItem("pokestack-profile", JSON.stringify(localData));
   },
 
   setUsername: function (username) {
@@ -171,42 +211,95 @@ const Game = {
     Game.elements.usernameError.innerText = "";
   },
 
-  // ===== GESTION DU LEADERBOARD =====
-  updateLeaderboard: function (score, username) {
-    const entry = {
-      username: username,
-      score: score,
-      date: new Date().toISOString().split('T')[0]
-    };
-
-    // Ajouter l'entrée
-    Game.cache.leaderboard.push(entry);
-
-    // Trier par score décroissant
-    Game.cache.leaderboard.sort((a, b) => b.score - a.score);
-
-    // Garder seulement le top 10
-    Game.cache.leaderboard = Game.cache.leaderboard.slice(0, 10);
-
-    Game.saveUserProfile();
+  // ===== GESTION DU LEADERBOARD FIREBASE =====
+  
+  // Sauvegarder un score dans Firebase
+  saveScoreToFirebase: async function (username, score) {
+    try {
+      const scoreData = {
+        username: username,
+        score: score,
+        timestamp: Date.now(),
+        date: new Date().toISOString().split('T')[0]
+      };
+      
+      // Créer une nouvelle entrée avec ID unique
+      await database.ref('leaderboard').push(scoreData);
+      console.log('✅ Score sauvegardé dans Firebase:', scoreData);
+    } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde Firebase:', error);
+    }
   },
 
+  // Charger le leaderboard depuis Firebase
+  loadLeaderboardFromFirebase: async function () {
+    try {
+      const snapshot = await database.ref('leaderboard')
+        .orderByChild('score')
+        .limitToLast(100) // Charger top 100
+        .once('value');
+      
+      const scores = [];
+      snapshot.forEach((childSnapshot) => {
+        scores.push(childSnapshot.val());
+      });
+      
+      // Trier par score décroissant
+      scores.sort((a, b) => b.score - a.score);
+      
+      // Garder seulement le top 10 pour affichage
+      return scores.slice(0, 10);
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement Firebase:', error);
+      return [];
+    }
+  },
+
+  // Obtenir le rang d'un utilisateur dans Firebase
+  getUserRankFromFirebase: async function (username) {
+    try {
+      const snapshot = await database.ref('leaderboard')
+        .orderByChild('score')
+        .once('value');
+      
+      const scores = [];
+      snapshot.forEach((childSnapshot) => {
+        scores.push(childSnapshot.val());
+      });
+      
+      // Trier par score décroissant
+      scores.sort((a, b) => b.score - a.score);
+      
+      // Trouver la meilleure position de l'utilisateur
+      const userBestScore = Math.max(...scores.filter(s => s.username === username).map(s => s.score), 0);
+      const rank = scores.findIndex(entry => entry.username === username && entry.score === userBestScore);
+      
+      return rank >= 0 ? rank + 1 : null;
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération du rang:', error);
+      return null;
+    }
+  },
+
+  // Vérifier si le score mérite d'être dans le top (pour Firebase)
   isTopScore: function (score) {
-    if (Game.cache.leaderboard.length < 10) return true;
-    return score > Game.cache.leaderboard[9].score;
+    // Avec Firebase, on sauve tous les scores
+    // Pas besoin de vérifier si top 10 avant de sauvegarder
+    return true;
   },
 
-  getUserRank: function () {
-    const username = Game.getUsername();
-    const rank = Game.cache.leaderboard.findIndex(entry => 
-      entry.username === username && entry.score === Game.cache.highscore
-    );
-    return rank >= 0 ? rank + 1 : null;
-  },
-
-  displayLeaderboard: function () {
-    const leaderboard = Game.cache.leaderboard;
+  displayLeaderboard: async function () {
     const currentUser = Game.getUsername();
+    
+    // Afficher un loader pendant le chargement
+    Game.elements.leaderboardList.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: #718096; font-size: 18px;">
+        Chargement... 🎮
+      </div>
+    `;
+    
+    // Charger depuis Firebase
+    const leaderboard = await Game.loadLeaderboardFromFirebase();
     
     if (leaderboard.length === 0) {
       Game.elements.leaderboardList.innerHTML = `
@@ -221,7 +314,7 @@ const Game = {
     let html = "";
     leaderboard.forEach((entry, index) => {
       const rank = index + 1;
-      const isCurrentUser = entry.username === currentUser && entry.score === Game.cache.highscore;
+      const isCurrentUser = entry.username === currentUser;
       const medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
       
       let classes = "leaderboard-entry";
@@ -241,12 +334,12 @@ const Game = {
 
     Game.elements.leaderboardList.innerHTML = html;
 
-    // Afficher le rang de l'utilisateur
-    const userRank = Game.getUserRank();
-    if (userRank) {
-      Game.elements.userRank.innerText = `Tu es ${userRank}${userRank === 1 ? 'er' : 'ème'} au classement! 🎯`;
+    // Obtenir le rang de l'utilisateur depuis Firebase
+    const userRank = await Game.getUserRankFromFirebase(currentUser);
+    if (userRank && userRank <= 100) {
+      Game.elements.userRank.innerText = `Tu es ${userRank}${userRank === 1 ? 'er' : 'ème'} au classement global! 🎯`;
     } else {
-      Game.elements.userRank.innerText = "Continue pour entrer dans le top 10!";
+      Game.elements.userRank.innerText = "Continue pour entrer dans le top 100!";
     }
   },
 
@@ -273,7 +366,13 @@ const Game = {
       return;
     }
 
-    Game.cache = profile;
+    // Charger uniquement les données locales (pas de leaderboard, c'est Firebase maintenant)
+    Game.cache = {
+      username: profile.username || "",
+      highscore: profile.highscore || 0,
+      gamesPlayed: profile.gamesPlayed || 0,
+      leaderboard: [] // Pas utilisé avec Firebase
+    };
     Game.showHighscore();
     Game.elements.playerName.innerText = Game.getUsername();
   },
@@ -282,7 +381,6 @@ const Game = {
   saveHighscore: function () {
     Game.calculateScore();
     const isNewPersonalRecord = Game.score > Game.cache.highscore;
-    const isTopTenScore = Game.isTopScore(Game.score);
 
     if (isNewPersonalRecord) {
       Game.cache.highscore = Game.score;
@@ -297,14 +395,13 @@ const Game = {
     // Incrémenter le nombre de parties
     Game.cache.gamesPlayed = (Game.cache.gamesPlayed || 0) + 1;
 
-    // Mettre à jour le leaderboard si c'est un top score
-    if (isTopTenScore) {
-      Game.updateLeaderboard(Game.score, Game.getUsername());
-    }
+    // Sauvegarder le score dans Firebase (leaderboard global)
+    Game.saveScoreToFirebase(Game.getUsername(), Game.score);
 
     // Afficher le score final
     Game.elements.finalScore.innerText = Game.score;
 
+    // Sauvegarder le profil local (username + highscore)
     Game.saveUserProfile();
   },
 
@@ -372,8 +469,8 @@ const Game = {
       Game.elements.previewBall.position.x = e.mouse.position.x;
     });
 
-    // Ajouter un ensemble pour suivre les balles qui ont franchi la barre
-    let ballsBelowBar = new Set();
+    // Réinitialiser l'ensemble des balles au démarrage
+    ballsBelowBar.clear();
 
     Events.on(engine, "collisionStart", function (e) {
       for (let i = 0; i < e.pairs.length; i++) {
@@ -463,12 +560,66 @@ const Game = {
   // Fonction appelée en cas de défaite
   loseGame: function () {
     Game.stateIndex = GameStates.LOSE;
+    
+    // Shake animation on game canvas
+    const canvas = document.querySelector('#game-canvas');
+    canvas.style.animation = 'shake 0.5s ease-in-out';
+    setTimeout(() => {
+      canvas.style.animation = '';
+    }, 500);
+    
     Game.elements.end.style.display = "flex";
     runner.enabled = false;
     Game.saveHighscore();
 
     // Réinitialiser l'ensemble des balles qui ont franchi la barre
     ballsBelowBar.clear();
+  },
+
+  // Redémarrer le jeu sans recharger la page
+  restartGame: function () {
+    // Cacher le modal de game over
+    Game.elements.end.style.display = "none";
+    
+    // Supprimer toutes les balles du canvas
+    const allBodies = Composite.allBodies(engine.world);
+    allBodies.forEach(body => {
+      if (!body.isStatic) {
+        Composite.remove(engine.world, body);
+      }
+    });
+    
+    // Réinitialiser le score et les balles fusionnées
+    Game.score = 0;
+    Game.elements.score.innerText = "0";
+    Game.ballsMerged = Array.apply(null, Array(Game.ballSizes.length)).map(() => 0);
+    
+    // Clear l'ensemble des balles qui ont franchi la barre
+    ballsBelowBar.clear();
+    
+    // Réactiver le runner
+    runner.enabled = true;
+    
+    // Retour au menu
+    Composite.remove(engine.world, gameStatics);
+    Composite.add(engine.world, menuStatics);
+    Game.elements.ui.style.display = "none";
+    Game.stateIndex = GameStates.MENU;
+    
+    // Réattacher l'event listener du menu
+    const menuMouseDown = function () {
+      if (
+        mouseConstraint.body === null ||
+        mouseConstraint.body?.label !== "btn-start"
+      ) {
+        return;
+      }
+      
+      Events.off(mouseConstraint, "mousedown", menuMouseDown);
+      Game.startGame();
+    };
+    
+    Events.on(mouseConstraint, "mousedown", menuMouseDown);
   },
 
   // Trouver l'indice d'un ball en fonction de son rayon
@@ -557,10 +708,55 @@ const Game = {
 
     return Promise.all(promises);
   },
+
+  // Anti-cheat: Monitor canvas size
+  initAntiCheat: function () {
+    // Store original dimensions
+    const originalCanvasWidth = render.options.width;
+    const originalCanvasHeight = render.options.height;
+    
+    // Check every second for canvas manipulation
+    setInterval(() => {
+      if (Game.stateIndex === GameStates.LOSE || Game.stateIndex === GameStates.MENU) return;
+      
+      // Check if canvas or render dimensions were modified
+      if (render.options.width !== originalCanvasWidth || 
+          render.options.height !== originalCanvasHeight ||
+          Game.width !== Game.originalWidth ||
+          Game.height !== Game.originalHeight) {
+        
+        console.warn('🚨 Canvas manipulation detected!');
+        Game.loseGame();
+        Game.elements.endTitle.innerText = "⚠️ Triche Détectée!";
+        Game.elements.gameEndMessage.innerText = "Modification du canvas interdite!";
+      }
+    }, 1000);
+
+    // Detect DevTools (warning only)
+    let devtoolsOpen = false;
+    const threshold = 160;
+    
+    setInterval(() => {
+      if (window.outerWidth - window.innerWidth > threshold || 
+          window.outerHeight - window.innerHeight > threshold) {
+        if (!devtoolsOpen) {
+          devtoolsOpen = true;
+          console.warn('⚠️ DevTools détecté - Joue fair-play! 🎮');
+        }
+      } else {
+        devtoolsOpen = false;
+      }
+    }, 500);
+  },
 };
 
 // Initialisation du moteur, du runner et du rendu
-const engine = Engine.create();
+const engine = Engine.create({
+  gravity: {
+    x: 0,
+    y: 2.5  // Augmenté de 1 à 2.5 pour des balls plus rapides
+  }
+});
 const runner = Runner.create();
 const render = Render.create({
   element: Game.elements.canvas,
@@ -658,7 +854,11 @@ render.mouse = mouse;
 // Initialiser le jeu
 Game.initGame();
 
+// Start anti-cheat monitoring
+Game.initAntiCheat();
+
 // Redimensionner le canvas en fonction de la taille de l'écran
+let resizeTimeout;
 const resizeCanvas = () => {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
@@ -682,12 +882,19 @@ const resizeCanvas = () => {
   Game.elements.ui.style.height = `${Game.height}px`;
   Game.elements.ui.style.transform = `scale(${scaleUI})`;
 
-  // Ajoutez une animation pour le redimensionnement
-  Game.elements.ui.style.transition = "transform 0.3s ease";
+  // Smooth transition
+  Game.elements.ui.style.transition = "transform 0.3s var(--ease-out-expo)";
+};
+
+// Throttled resize handler for better performance
+const throttledResize = () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(resizeCanvas, 100);
 };
 
 // Appeler la fonction de redimensionnement lors du chargement et du redimensionnement de la page
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener("resize", throttledResize);
+window.addEventListener("orientationchange", resizeCanvas);
 document.addEventListener("DOMContentLoaded", resizeCanvas);
 
 // ===== EVENT LISTENERS POUR LE LEADERBOARD ET USERNAME =====

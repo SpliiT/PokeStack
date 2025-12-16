@@ -31,8 +31,16 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6366F1">
+  <meta name="description" content="PokeStacky - Une expérience de jeu addictive et premium avec les Pokéballs!">
   <title>PokeStacky - SpliiT</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" type="image/png" href="assets/img/favicon.png">
 </head>
@@ -81,7 +89,7 @@
             <div id="game-end-title">Game Over!</div>
             <div id="game-end-score">Score: <span id="final-score">0</span></div>
             <div id="game-end-message"></div>
-            <a id="game-end-link" href="">Rejouer</a>
+            <button id="game-end-link" onclick="Game.restartGame()">Rejouer</button>
             <button id="view-leaderboard-btn" class="btn-secondary">Voir le Classement</button>
           </div>
         </div>
@@ -105,7 +113,13 @@
       </div>
     </div>
   </div>
+  <!-- Firebase SDK first -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- Then our scripts -->
   <script type="text/javascript" src="js/matter.js"></script>
+  <script type="text/javascript" src="js/firebase-config.js"></script>
   <script type="text/javascript" src="js/index.js"></script>
 </body>
 
