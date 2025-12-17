@@ -62,6 +62,16 @@ const MenuManager = {
     this.elements.showLeaderboardBtn?.addEventListener('click', () => this.showLeaderboard());
     this.elements.toggleSoundBtn?.addEventListener('click', () => this.toggleSound());
     this.elements.backToMenuBtn?.addEventListener('click', () => this.showMainMenu());
+    
+    // Bouton "Voir le Classement" du Game Over
+    const viewLeaderboardBtn = document.getElementById('view-leaderboard-btn');
+    if (viewLeaderboardBtn) {
+      viewLeaderboardBtn.addEventListener('click', () => {
+        this.openMenu();
+        this.showLeaderboard();
+      });
+      console.log('Menu: View Leaderboard button found and event listener added');
+    }
   },
   
   openMenu() {

@@ -24,9 +24,10 @@ const {
 
 // Paramètres pour le jeu
 const wallPad = 64;
-const loseHeight = 84;
+const headerHeight = 40; // Hauteur du header (2.5rem = 40px)
+const loseHeight = 84 + headerHeight; // 124px - position après le header
 const statusBarHeight = 48;
-const previewBallHeight = 32;
+const previewBallHeight = 32 + headerHeight; // Position après le header
 const friction = {
   friction: 0.006,
   frictionStatic: 0.006,
@@ -54,6 +55,7 @@ const Game = {
   elements: {
     canvas: document.getElementById("game-canvas"),
     ui: document.getElementById("game-ui"),
+    header: document.getElementById("game-header"),
     score: document.getElementById("game-score"),
     end: document.getElementById("game-end-container"),
     endTitle: document.getElementById("game-end-title"),
@@ -459,30 +461,30 @@ const Game = {
 
       Game.loadHighscore();
       Game.elements.ui.style.display = "none";
+      Game.elements.header.style.display = "none";
       Game.ballsMerged = Array.apply(null, Array(Game.ballSizes.length)).map(
         () => 0
       );
 
-      // Le texte START sera créé après le modal username
-
-      const menuMouseDown = function () {
-        if (
-          mouseConstraint.body === null ||
-          mouseConstraint.body?.label !== "btn-start"
-        ) {
-          return;
-        }
-
-        // Effet press sur le bouton
-        Game.pressStartButton();
-
-        Events.off(mouseConstraint, "mousedown", menuMouseDown);
-        setTimeout(() => {
-          Game.startGame();
-        }, 150); // Délai pour l'animation press
-      };
-
-      Events.on(mouseConstraint, "mousedown", menuMouseDown);
+      // UTILISER LE BOUTON START HARDCODÉ
+      const startButton = document.getElementById('start-game-button');
+      const startOverlay = document.getElementById('start-button-overlay');
+      
+      if (startButton && startOverlay) {
+        // Afficher le bouton START
+        startOverlay.classList.remove('hidden');
+        
+        // Ajouter l'événement de clic sur le bouton START
+        startButton.addEventListener('click', function() {
+          // Cacher le bouton START
+          startOverlay.classList.add('hidden');
+          
+          // Démarrer le jeu
+          setTimeout(() => {
+            Game.startGame();
+          }, 150);
+        });
+      }
     });
   },
 
@@ -564,6 +566,7 @@ const Game = {
     Game.calculateScore();
     Game.elements.endTitle.innerText = "Partie terminée !";
     Game.elements.ui.style.display = "block";
+    Game.elements.header.style.display = "flex";
     Game.elements.end.style.display = "none";
     Game.elements.previewBall = Game.generateballBody(
       Game.width / 2,
@@ -740,6 +743,12 @@ const Game = {
     // Cacher le modal de game over
     Game.elements.end.style.display = "none";
     
+    // Supprimer la previewBall si elle existe
+    if (Game.elements.previewBall) {
+      Composite.remove(engine.world, Game.elements.previewBall);
+      Game.elements.previewBall = null;
+    }
+    
     // Supprimer toutes les balles du canvas
     const allBodies = Composite.allBodies(engine.world);
     allBodies.forEach(body => {
@@ -763,22 +772,17 @@ const Game = {
     Composite.remove(engine.world, gameStatics);
     Composite.add(engine.world, menuStatics);
     Game.elements.ui.style.display = "none";
+    Game.elements.header.style.display = "none";
     Game.stateIndex = GameStates.MENU;
     
-    // Réattacher l'event listener du menu
-    const menuMouseDown = function () {
-      if (
-        mouseConstraint.body === null ||
-        mouseConstraint.body?.label !== "btn-start"
-      ) {
-        return;
-      }
-      
-      Events.off(mouseConstraint, "mousedown", menuMouseDown);
-      Game.startGame();
-    };
+    // Réinitialiser la prochaine balle
+    Game.setNextballSize();
     
-    Events.on(mouseConstraint, "mousedown", menuMouseDown);
+    // Réafficher le bouton START hardcodé
+    const startOverlay = document.getElementById('start-button-overlay');
+    if (startOverlay) {
+      startOverlay.classList.remove('hidden');
+    }
   },
 
   // Trouver l'indice d'un ball en fonction de son rayon
@@ -953,14 +957,15 @@ const menuStatics = [
     });
   }),
 
-  // Bouton START stylé Pokémon (sans image)
+  // Bouton START stylé Pokémon (invisible - remplacé par le bouton HTML)
   Bodies.rectangle(Game.width / 2, Game.height * 0.75, 280, 80, {
     isStatic: true,
     label: "btn-start",
     render: { 
-      fillStyle: "#FFCB05",
-      strokeStyle: "#FB1B1B", 
-      lineWidth: 6
+      fillStyle: "transparent",
+      strokeStyle: "transparent", 
+      lineWidth: 0,
+      visible: false
     },
   }),
 ];
