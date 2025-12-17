@@ -201,6 +201,10 @@ canvas {
   display: block;
   max-width: 100%;
   box-sizing: content-box;
+  /* Optimisation pour rendu net sur mobile */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
 }
 
 #game-canvas {
@@ -214,6 +218,11 @@ canvas {
   border-radius: var(--radius-md);
   overflow: hidden;
   background: linear-gradient(135deg, #FFDE59 0%, #FFCC01 100%);
+  /* Optimisation pour rendu net */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* ===== GAME HEADER - SIMILAR TO FOOTER ===== */

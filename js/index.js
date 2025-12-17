@@ -1046,8 +1046,20 @@ const resizeCanvas = () => {
     newHeight = newWidth / aspectRatio;
   }
 
+  // Obtenir le device pixel ratio (2x sur Retina, 3x sur certains téléphones)
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  // Définir la résolution interne du canvas (haute résolution)
+  render.canvas.width = Game.width * pixelRatio;
+  render.canvas.height = Game.height * pixelRatio;
+  
+  // Définir l'affichage CSS (taille visible)
   render.canvas.style.width = `${newWidth}px`;
   render.canvas.style.height = `${newHeight}px`;
+  
+  // Ajuster le contexte pour le pixel ratio
+  const ctx = render.canvas.getContext('2d');
+  ctx.scale(pixelRatio, pixelRatio);
 
   const scaleUI = newWidth / Game.width;
   Game.elements.ui.style.width = `${Game.width}px`;
