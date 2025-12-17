@@ -285,6 +285,7 @@ canvas {
   border: 6px solid #FFCB05;
   border-radius: 20px;
   padding: 2rem 4rem;
+  margin: 2rem 0;
   cursor: pointer;
   box-shadow:
     0 5px 30px 5px rgba(0, 0, 0, 0.5),
