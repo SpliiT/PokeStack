@@ -33,7 +33,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6366F1">
-  <meta name="description" content="PokeStacky - Une expérience de jeu addictive et premium avec les Pokéballs!">
+  <meta name="description" content="PokeStacky - Le SuikaGame version pokémon !">
   <title>PokeStacky - SpliiT</title>
 
   <!-- Google Fonts -->
@@ -48,19 +48,25 @@
 <body>
 
   <!-- Username Modal -->
-  <div id="username-modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modal-title">Bienvenue sur PokeStack! 🏆</h2>
-        <p id="modal-subtitle">Entre ton pseudo pour commencer</p>
+  <div id="username-modal" class="modal" style="display: none;">
+    <div class="modern-modal">
+      <div class="modal-glow"></div>
+      <h1 id="modal-title">Bienvenue sur PokeStack</h1>
+      <p id="modal-subtitle">Entre ton pseudo pour commencer ton aventure</p>
+
+      <div class="modern-input-wrapper">
+        <input type="text" id="username-input" placeholder="Ton pseudo..." maxlength="15" autocomplete="off" />
       </div>
-      <div class="modal-body">
-        <input type="text" id="username-input" placeholder="Ton pseudo..." maxlength="15" />
-        <p id="username-error" class="error-message"></p>
-      </div>
-      <div class="modal-footer">
-        <button id="username-submit" class="btn-primary">Commencer !</button>
-      </div>
+
+      <p id="username-error" class="modern-error"></p>
+
+      <button id="username-submit" class="modern-btn">
+        <span>Commencer</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </button>
     </div>
   </div>
 

@@ -198,7 +198,7 @@ const Game = {
       Game.elements.modalTitle.innerText = "🎉 Nouveau Record! 🎉";
       Game.elements.modalSubtitle.innerText = "Tu as battu ton record! Entre ton pseudo:";
     } else {
-      Game.elements.modalTitle.innerText = "Bienvenue sur PokeStack! 🏆";
+      Game.elements.modalTitle.innerText = "Bienvenue sur PokeStack";
       Game.elements.modalSubtitle.innerText = "Entre ton pseudo pour commencer";
     }
     Game.elements.usernameModal.style.display = "flex";
@@ -519,8 +519,16 @@ const Game = {
       }
     };
     
-    Game.elements.canvas.appendChild(startText);
     updateTextPosition();
+    
+    // Ajouter au game-ui au lieu du canvas
+    const gameUI = document.getElementById('game-ui');
+    if (gameUI) {
+      gameUI.appendChild(startText);
+    } else {
+      // Fallback si game-ui n'existe pas
+      Game.elements.ui.appendChild(startText);
+    }
     
     // Mettre à jour la position lors du resize
     window.addEventListener('resize', updateTextPosition);
