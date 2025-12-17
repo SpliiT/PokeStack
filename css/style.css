@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Pokemon";
-  src: url(assets/font/Pokemon.ttf) format("truetype");
+  src: url(/assets/font/Pokemon.ttf) format("truetype");
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
@@ -139,16 +139,17 @@ body::after {
   max-height: 960px;
   margin: 0 auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; /* Centré verticalement */
+  justify-content: center; /* Centré horizontalement */
   position: relative;
   z-index: 1;
+  padding: 0.5rem;
 }
 
 /* ===== POKÉDEX FRAME ===== */
 #pokedex-frame {
   position: relative;
-  padding: 2rem;
+  padding: 1.5rem; /* Réduit sur desktop */
   background: var(--red-gradient);
   border-radius: var(--radius-xl);
   box-shadow: 
@@ -156,6 +157,8 @@ body::after {
     inset 0 -10px 30px rgba(0, 0, 0, 0.3),
     inset 0 10px 30px rgba(255, 255, 255, 0.2);
   border: 6px solid #8B0000;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 /* Animated Blue LED */
@@ -224,12 +227,53 @@ canvas {
   transform-origin: top left;
 }
 
+/* ===== LOSE BAR - LIMITE DE DÉFAITE ===== */
+#lose-bar {
+  position: absolute;
+  top: 84px; /* loseHeight */
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--pokemon-red) 10%, 
+    var(--pokemon-red) 90%, 
+    transparent 100%);
+  box-shadow: 
+    0 0 10px var(--pokemon-red),
+    0 0 20px rgba(251, 27, 27, 0.5);
+  z-index: 5;
+  pointer-events: none;
+  animation: loseBarPulse 2s ease-in-out infinite;
+}
+
+@keyframes loseBarPulse {
+  0%, 100% {
+    opacity: 0.6;
+    box-shadow: 
+      0 0 10px var(--pokemon-red),
+      0 0 20px rgba(251, 27, 27, 0.5);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 
+      0 0 15px var(--pokemon-red),
+      0 0 30px rgba(251, 27, 27, 0.8);
+  }
+}
+
 /* ===== SCORE DISPLAY - POKÉMON STYLE ===== */
 #score-container {
   position: absolute;
-  top: 0;
-  left: 0;
-  padding: 1rem;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.4); /* Fond plus foncé pour meilleur contraste */
+  backdrop-filter: blur(10px);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
   z-index: 10;
 }
 
@@ -272,15 +316,19 @@ canvas {
 /* ===== NEXT BOX - TOP RIGHT ===== */
 #next-container {
   position: absolute;
-  top: 1rem;
+  top: 1rem; /* Aligné avec le score */
   right: 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  border: var(--retro-border);
-  border-radius: 0;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 3px solid rgba(255, 255, 255, 0.3);
   padding: 0.75rem;
-  box-shadow: var(--retro-shadow-sm);
-  text-align: center;
-  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-md);
+  pointer-events: none;
 }
 
 .next-label {
@@ -288,8 +336,13 @@ canvas {
   font-size: 1.25rem;
   font-weight: 900;
   color: var(--pokemon-red);
-  margin-bottom: 0.5rem;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  text-shadow: 
+    -2px -2px 0 var(--pokemon-yellow),
+    2px -2px 0 var(--pokemon-yellow),
+    -2px 2px 0 var(--pokemon-yellow),
+    2px 2px 0 var(--pokemon-yellow);
+  line-height: 1;
+  display: none; /* Caché sur mobile */
 }
 
 #next-container #game-next-ball {
@@ -297,6 +350,8 @@ canvas {
   height: 3rem;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
   transition: transform 0.3s var(--ease-out-expo);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 #next-container #game-next-ball:hover {
@@ -746,6 +801,7 @@ canvas {
     inset 0 4px 8px rgba(0, 0, 0, 0.2),
     0 -2px 10px rgba(0, 0, 0, 0.3);
   border-top: 2px solid #4B5563;
+  z-index: 10; /* Au-dessus du canvas pour que les balls ne passent pas dessous */
 }
 
 .status-info {
@@ -757,32 +813,35 @@ canvas {
 .status-label {
   color: var(--white);
   font-size: 0.95rem;
-  font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-weight: 700;
+  font-family: 'Inter', sans-serif; /* Police plus lisible */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9); /* Ombre plus foncée */
 }
 
 #player-name {
   color: var(--pokemon-yellow);
-  font-family: "Pokemon", sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 900;
   font-size: 1.125rem;
   text-shadow: 
-    -2px -2px 0 var(--pokemon-blue),
-    2px -2px 0 var(--pokemon-blue),
-    -2px 2px 0 var(--pokemon-blue),
-    2px 2px 0 var(--pokemon-blue);
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000,
+    2px 2px 4px rgba(0, 0, 0, 0.9); /* Contour plus fin */
 }
 
 #game-highscore-value {
   color: var(--pokemon-yellow);
-  font-family: "Pokemon", sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 900;
   font-size: 1.375rem;
   text-shadow: 
-    -2px -2px 0 var(--pokemon-blue),
-    2px -2px 0 var(--pokemon-blue),
-    -2px 2px 0 var(--pokemon-blue),
-    2px 2px 0 var(--pokemon-blue);
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000,
+    2px 2px 4px rgba(0, 0, 0, 0.9); /* Contour plus fin */
 }
 
 /* Pokéball Button */
@@ -882,15 +941,29 @@ canvas {
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   html {
-    font-size: 14px;
+    font-size: 16px; /* Augmenté pour mobile */
   }
   
+  #game-score {
+    font-size: 5rem !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 900 !important;
+    color: #FFCB05 !important;
+    text-shadow: 
+      -2px -2px 0 #000,
+      2px -2px 0 #000,
+      -2px 2px 0 #000,
+      2px 2px 0 #000,
+      0 0 0 4px var(--pokemon-blue) !important;
+  }
+  
+  
   .modal-content {
-    padding: var(--spacing-xl) var(--spacing-lg);
+    padding: var(--spacing-xl) var(--spacing-md);
   }
   
   .modal-header h2 {
-    font-size: 1.75rem;
+    font-size: 2rem; /* Augmenté */
   }
   
   .leaderboard-content {
@@ -898,24 +971,24 @@ canvas {
   }
   
   .leaderboard-header h2 {
-    font-size: 2rem;
+    font-size: 2.25rem; /* Augmenté */
   }
   
   .leaderboard-entry {
-    padding: 1rem 1rem;
+    padding: 1.25rem 1rem; /* Augmenté */
   }
   
   .leaderboard-rank {
-    font-size: 1.5rem;
-    min-width: 2.5rem;
+    font-size: 2rem; /* Augmenté */
+    min-width: 3rem;
   }
   
   .leaderboard-name {
-    font-size: 1.125rem;
+    font-size: 1.375rem; /* Augmenté */
   }
   
   .leaderboard-score {
-    font-size: 1.375rem;
+    font-size: 1.75rem; /* Augmenté */
   }
   
   #game-end {
@@ -923,61 +996,164 @@ canvas {
   }
   
   #game-end-title {
-    font-size: 2.5rem;
+    font-size: 3rem; /* Augmenté */
   }
   
   .btn-primary, .btn-secondary, #game-end-link {
-    font-size: 1.25rem;
-    padding: 1rem 1.75rem;
+    font-size: 1.5rem; /* Augmenté */
+    padding: 1.125rem 2rem; /* Augmenté */
   }
   
   #game-status {
-    height: 3.125rem;
-    padding: 0 var(--spacing-sm);
+    height: 4.5rem !important;
+    padding: 0 var(--spacing-md);
+    z-index: 10 !important; /* Au-dessus du canvas */
   }
   
-  .game-status-label {
-    font-size: 0.875rem;
+  .status-label {
+    font-size: 1.25rem !important; /* Plus grand */
+    font-weight: 800 !important;
+    font-family: 'Inter', sans-serif !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.95) !important;
   }
   
   #game-highscore-value {
-    font-size: 1.375rem;
+    font-size: 1.75rem !important;
   }
   
   #player-name {
-    font-size: 1rem;
+    font-size: 1.375rem !important;
+  }
+  
+  .pokeball-btn {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+  }
+  
+  /* NEXT box */
+  #next-container {
+    padding: 0.75rem !important;
+    min-width: 85px;
+    right: 1.5rem !important;
+  }
+  
+  .next-label {
+    font-size: 1.375rem !important;
+  }
+  
+  #game-next-ball {
+    width: 45px !important;
+    height: 45px !important;
+  }
+  
+  /* Maximiser l'espace sur tablette */
+  .container {
+    padding: 0;
+  }
+  
+  #pokedex-frame {
+    padding: 0.5rem;
+    border: 2px solid #8B0000;
+    border-radius: var(--radius-md);
+  }
+  
+  #pokedex-led {
+    top: 0.25rem;
+    left: 0.5rem;
+    width: 12px;
+    height: 12px;
   }
 }
 
 @media (max-width: 480px) {
   html {
-    font-size: 12px;
+    font-size: 16px; /* Maintenu pour mobile */
   }
   
   #game-score {
-    font-size: 4rem;
+    font-size: 4.5rem !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 900 !important;
+    text-shadow: 
+      -3px -3px 0 #000,
+      3px -3px 0 #000,
+      -3px 3px 0 #000,
+      3px 3px 0 #000,
+      0 0 0 4px var(--pokemon-blue) !important;
   }
   
+  
   .modal-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.875rem;
   }
   
   #game-end-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
   
   #game-end-score {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
   
   #game-end-score span {
-    font-size: 2.25rem;
+    font-size: 2.75rem;
   }
   
   .btn-primary, .btn-secondary, #game-end-link {
-    font-size: 1.125rem;
-    padding: 0.875rem 1.5rem;
+    font-size: 1.375rem;
+    padding: 1rem 1.75rem;
     margin: var(--spacing-xs);
+  }
+  
+  #game-status {
+    height: 4rem !important;
+    z-index: 10 !important; /* Au-dessus du canvas */
+  }
+  
+  .status-label {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8) !important;
+  }
+  
+  #player-name {
+    font-size: 1.25rem !important;
+  }
+  
+  #game-highscore-value {
+    font-size: 1.5rem !important;
+  }
+  
+  /* ZERO padding sur très petits écrans - Maximum d'espace */
+  .container {
+    padding: 0;
+  }
+  
+  #pokedex-frame {
+    padding: 0.25rem;
+    border: 2px solid #8B0000;
+    border-radius: var(--radius-sm);
+  }
+  
+  #pokedex-led {
+    width: 10px;
+    height: 10px;
+    top: 0.25rem;
+    left: 0.25rem;
+  }
+  
+  #score-container {
+    padding: 0.25rem;
+  }
+  
+  #next-container {
+    top: 0.25rem;
+    right: 0.25rem;
+    padding: 0.35rem;
+  }
+  
+  .next-label {
+    font-size: 0.875rem;
   }
 }
 

@@ -419,6 +419,8 @@ const Game = {
         () => 0
       );
 
+      // Le texte START sera créé après le modal username
+
       const menuMouseDown = function () {
         if (
           mouseConstraint.body === null ||
@@ -427,17 +429,82 @@ const Game = {
           return;
         }
 
+        // Effet press sur le bouton
+        Game.pressStartButton();
+
         Events.off(mouseConstraint, "mousedown", menuMouseDown);
-        Game.startGame();
+        setTimeout(() => {
+          Game.startGame();
+        }, 150); // Délai pour l'animation press
       };
 
       Events.on(mouseConstraint, "mousedown", menuMouseDown);
     });
   },
 
+  // Créer le texte START en overlay
+  createStartButtonText: function () {
+    const startText = document.createElement('div');
+    startText.id = 'start-button-text';
+    startText.innerText = 'START';
+    startText.style.cssText = `
+      position: absolute;
+      font-family: 'Pokemon', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: #FB1B1B;
+      text-shadow: 
+        -3px -3px 0 #2A75BB,
+        3px -3px 0 #2A75BB,
+        -3px 3px 0 #2A75BB,
+        3px 3px 0 #2A75BB;
+      pointer-events: none;
+      z-index: 100;
+      transition: transform 0.1s ease;
+    `;
+    
+    // Positionner le texte au centre du bouton
+    const updateTextPosition = () => {
+      const btnBody = menuStatics.find(item => item.label === 'btn-start');
+      if (btnBody) {
+        const canvasRect = render.canvas.getBoundingClientRect();
+        const scaleUI = canvasRect.width / Game.width;
+        
+        startText.style.left = `${btnBody.position.x * scaleUI - 70}px`;
+        startText.style.top = `${btnBody.position.y * scaleUI - 30}px`;
+      }
+    };
+    
+    Game.elements.canvas.appendChild(startText);
+    updateTextPosition();
+    
+    // Mettre à jour la position lors du resize
+    window.addEventListener('resize', updateTextPosition);
+    
+    Game.elements.startText = startText;
+  },
+
+  // Effet press sur le bouton START
+  pressStartButton: function () {
+    if (Game.elements.startText) {
+      Game.elements.startText.style.transform = 'scale(0.95) translateY(3px)';
+      setTimeout(() => {
+        if (Game.elements.startText) {
+          Game.elements.startText.style.transform = 'scale(1) translateY(0)';
+        }
+      }, 100);
+    }
+  },
+
   // Démarrer le jeu
   startGame: function () {
     Game.sounds.click.play();
+
+    // Supprimer le texte START
+    if (Game.elements.startText) {
+      Game.elements.startText.remove();
+      Game.elements.startText = null;
+    }
 
     Composite.remove(engine.world, menuStatics);
     Composite.add(engine.world, gameStatics);
@@ -834,10 +901,15 @@ const menuStatics = [
     });
   }),
 
-  Bodies.rectangle(Game.width / 2, Game.height * 0.75, 512, 96, {
+  // Bouton START stylé Pokémon (sans image)
+  Bodies.rectangle(Game.width / 2, Game.height * 0.75, 280, 80, {
     isStatic: true,
     label: "btn-start",
-    render: { sprite: { texture: "./assets/img/btn-start.png" } },
+    render: { 
+      fillStyle: "#FFCB05",
+      strokeStyle: "#FB1B1B", 
+      lineWidth: 6
+    },
   }),
 ];
 
@@ -905,13 +977,16 @@ const resizeCanvas = () => {
 
   const aspectRatio = Game.width / Game.height;
 
-  let newWidth = screenWidth;
-  let newHeight = screenHeight;
+  // ZERO marge sur mobile pour maximiser complètement l'espace
+  const margin = screenWidth <= 480 ? 0 : (screenWidth <= 768 ? 4 : 8);
+  
+  let newWidth = screenWidth - (margin * 2);
+  let newHeight = screenHeight - (margin * 2);
 
-  if (screenWidth / screenHeight > aspectRatio) {
-    newWidth = screenHeight * aspectRatio;
+  if (newWidth / newHeight > aspectRatio) {
+    newWidth = newHeight * aspectRatio;
   } else {
-    newHeight = screenWidth / aspectRatio;
+    newHeight = newWidth / aspectRatio;
   }
 
   render.canvas.style.width = `${newWidth}px`;
@@ -955,6 +1030,11 @@ Game.elements.usernameSubmit.addEventListener("click", function () {
   
   Game.setUsername(username);
   Game.hideUsernameModal();
+  
+  // Créer le texte START après fermeture du modal
+  setTimeout(() => {
+    Game.createStartButtonText();
+  }, 100);
   
   // Si c'est la première fois, initialiser le highscore
   if (Game.cache.highscore === 0) {
