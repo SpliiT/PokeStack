@@ -68,7 +68,7 @@
   <div id="leaderboard-container" style="display: none;">
     <div class="leaderboard-content">
       <div class="leaderboard-header">
-        <h2>🏆 Top 10 Joueurs</h2>
+        <h2>🏆 Leaderboard</h2>
         <button id="close-leaderboard" class="btn-close">✕</button>
       </div>
       <div id="leaderboard-list"></div>
@@ -79,36 +79,46 @@
   </div>
 
   <div class="container">
-    <div id="game-canvas">
-      <div id="game-ui">
-        <p id="game-bar"></p>
-        <p id="game-score"></p>
+    <!-- Pokédex Frame with LED -->
+    <div id="pokedex-frame">
+      <div id="pokedex-led"></div>
 
-        <div id="game-end-container">
-          <div id="game-end">
-            <div id="game-end-title">Game Over!</div>
-            <div id="game-end-score">Score: <span id="final-score">0</span></div>
-            <div id="game-end-message"></div>
-            <button id="game-end-link" onclick="Game.restartGame()">Rejouer</button>
-            <button id="view-leaderboard-btn" class="btn-secondary">Voir le Classement</button>
+      <div id="game-canvas">
+        <div id="game-ui">
+          <!-- Score - Top Left with Pokemon Font -->
+          <div id="score-container">
+            <p id="game-score">0</p>
           </div>
-        </div>
 
-        <div id="game-status">
-          <div class="game-status-item">
-            <div class="game-status-label">
-              <span id="player-name">Joueur</span>
-            </div>
-          </div>
-          <div class="game-status-item">
-            <div class="game-status-label">Record :</div>
-            <div id="game-highscore-value">0</div>
-          </div>
-          <div class="game-status-item">
-            <div class="game-status-label">Prochaine Ball : </div>
+          <!-- NEXT Box - Top Right -->
+          <div id="next-container">
+            <div class="next-label">NEXT</div>
             <img id="game-next-ball" src="./assets/img/circle0.png" />
           </div>
-          <button id="leaderboard-btn" class="btn-icon" title="Voir le classement">🏆</button>
+
+          <!-- Game Over Modal -->
+          <div id="game-end-container">
+            <div id="game-end">
+              <div id="game-end-title">Game Over!</div>
+              <div id="game-end-score">Score: <span id="final-score">0</span></div>
+              <div id="game-end-message"></div>
+              <button id="game-end-link" onclick="Game.restartGame()">Rejouer</button>
+              <button id="view-leaderboard-btn" class="btn-secondary">Voir le Classement</button>
+            </div>
+          </div>
+
+          <!-- Status Bar - Bottom -->
+          <div id="game-status">
+            <div class="status-info">
+              <span class="status-label">Dresseur:</span>
+              <span id="player-name">Joueur</span>
+            </div>
+            <div class="status-info">
+              <span class="status-label">Record:</span>
+              <span id="game-highscore-value">0</span>
+            </div>
+            <button id="leaderboard-btn" class="pokeball-btn" title="Voir le classement"></button>
+          </div>
         </div>
       </div>
     </div>

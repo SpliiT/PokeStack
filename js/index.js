@@ -555,6 +555,46 @@ const Game = {
     setTimeout(() => {
       Composite.remove(engine.world, circle);
     }, 100);
+
+    // Ajouter des particules colorées
+    Game.createParticles(x, y, r);
+  },
+
+  // Système de particules pour les fusions
+  createParticles: function (x, y, ballRadius) {
+    const particleCount = 10;
+    const colors = ['#FFCB05', '#FB1B1B', '#2A75BB', '#FFD700', '#FF6B6B'];
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (Math.PI * 2 * i) / particleCount;
+      const velocity = 3 + rand() * 2;
+      const particleRadius = 4 + rand() * 4;
+      const color = colors[Math.floor(rand() * colors.length)];
+      
+      const particle = Bodies.circle(x, y, particleRadius, {
+        isStatic: false,
+        collisionFilter: { mask: 0x0040 }, // Ne pas collider avec les autres objets
+        render: {
+          fillStyle: color,
+        },
+        friction: 0.01,
+        frictionAir: 0.03,
+        restitution: 0.5,
+      });
+      
+      // Appliquer une vélocité radiale
+      Matter.Body.setVelocity(particle, {
+        x: Math.cos(angle) * velocity,
+        y: Math.sin(angle) * velocity,
+      });
+      
+      Composite.add(engine.world, particle);
+      
+      // Supprimer la particule après 600ms
+      setTimeout(() => {
+        Composite.remove(engine.world, particle);
+      }, 600);
+    }
   },
 
   // Fonction appelée en cas de défaite
