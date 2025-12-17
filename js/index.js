@@ -348,6 +348,50 @@ const Game = {
     Game.elements.leaderboardContainer.style.display = "flex";
   },
 
+  // showLeaderboard: DÉSACTIVÉ - Maintenant géré par MenuManager dans menu.js
+  /* 
+  showLeaderboard: function () {
+    Game.elements.leaderboardContainer.style.display = "flex";
+
+    // Fetch leaderboard from Firebase
+    fetch(
+      `https://us-central1-suika-game-c549f.cloudfunctions.net/getLeaderboard`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        const leaderboard = data.leaderboard;
+        Game.cache.leaderboard = leaderboard;
+
+        // Display leaderboard
+        let html = "";
+        const currentUser = localStorage.getItem("playerName");
+        for (let i = 0; i < leaderboard.length; i++) {
+          const entry = leaderboard[i];
+          const isCurrentUser = entry.name === currentUser;
+          let classes = "leaderboard-entry";
+          if (isCurrentUser) classes += " current-user";
+          else if (i === 0) classes += " top-1";
+          else if (i === 1) classes += " top-2";
+          else if (i === 2) classes += " top-3";
+
+          html += `
+            <div class="${classes}">
+              <div class="leaderboard-rank">${i + 1}</div>
+              <div class="leaderboard-name">${entry.name}${isCurrentUser ? ' (You)' : ''}</div>
+              <div class="leaderboard-score">${entry.score}</div>
+            </div>
+          `;
+        }
+        Game.elements.leaderboardList.innerHTML = html;
+      })
+      .catch((error) => {
+        console.error("Error fetching leaderboard:", error);
+        Game.elements.leaderboardList.innerHTML =
+          "<p>Error loading leaderboard.</p>";
+      });
+  },
+  */
+
   hideLeaderboard: function () {
     Game.elements.leaderboardContainer.style.display = "none";
   },
@@ -1049,6 +1093,7 @@ Game.elements.usernameInput.addEventListener("keypress", function (e) {
   }
 });
 
+/* LEADERBOARD EVENT LISTENERS - Désactivés, maintenant gérés par MenuManager dans menu.js
 // Ouvrir le leaderboard (bouton dans le jeu)
 Game.elements.leaderboardBtn.addEventListener("click", function () {
   Game.showLeaderboard();
@@ -1070,3 +1115,4 @@ Game.elements.leaderboardContainer.addEventListener("click", function (e) {
     Game.hideLeaderboard();
   }
 });
+*/

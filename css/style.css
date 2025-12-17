@@ -136,11 +136,11 @@ body::after {
   min-width: 100vw;
   min-height: 100vh;
   max-width: 640px;
-  max-height: 960px;
+  max-height: 90vh; /* Réduit pour que le jeu tienne sur desktop */
   margin: 0 auto;
   display: flex;
-  align-items: center; /* Centré verticalement */
-  justify-content: center; /* Centré horizontalement */
+  align-items: center; /* Centré sur desktop */
+  justify-content: center;
   position: relative;
   z-index: 1;
   padding: 0.5rem;
@@ -278,7 +278,7 @@ canvas {
 }
 
 #game-score {
-  font-family: "Pokemon", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 4rem;
   font-weight: 900;
   color: var(--pokemon-yellow);
@@ -332,7 +332,7 @@ canvas {
 }
 
 .next-label {
-  font-family: "Pokemon", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 1.25rem;
   font-weight: 900;
   color: var(--pokemon-red);
@@ -346,12 +346,11 @@ canvas {
 }
 
 #next-container #game-next-ball {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem; /* Réduit pour éviter pixelisation */
+  height: 2.5rem;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
   transition: transform 0.3s var(--ease-out-expo);
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  image-rendering: auto; /* Smooth rendering au lieu de crisp */
 }
 
 #next-container #game-next-ball:hover {
@@ -547,19 +546,162 @@ canvas {
   padding: var(--spacing-lg);
   overflow-y: auto;
 }
-
-.leaderboard-content {
-  background: var(--white);
-  border-radius: 0;
-  border: var(--retro-border);
-  padding: var(--spacing-xl) var(--spacing-lg);
-  max-width: 600px;
+/* ===== GENERAL MENU (REMPLACE LEADERBOARD) ===== */
+#menu-container {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--retro-shadow);
-  animation: slideInUp 0.5s var(--ease-out-expo);
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
 }
+
+.menu-content {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: 0;
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  border: 6px solid var(--text-secondary);
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.3);
+  animation: bounceIn 0.5s var(--ease-out-expo);
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 3px solid transparent;
+  border-image: var(--accent-gradient) 1;
+}
+
+.menu-header h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--pokemon-red);
+  margin: 0;
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+}
+
+/* Menu Sections */
+.menu-section {
+  display: none;
+}
+
+.menu-section.active {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Menu Buttons Grid */
+.menu-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: linear-gradient(135deg, rgba(255, 203, 5, 0.95) 0%, rgba(255, 185, 0, 0.95) 100%);
+  border: 4px solid var(--text-secondary);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out-expo);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+
+.menu-btn svg {
+  flex-shrink: 0;
+  color: var(--pokemon-red);
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.3));
+}
+
+.menu-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, rgba(255, 215, 5, 1) 0%, rgba(255, 195, 0, 1) 100%);
+}
+
+.menu-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Back Button */
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(156, 163, 175, 0.2);
+  border: 3px solid var(--text-secondary);
+  border-radius: 0;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out-expo);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.back-btn:hover {
+  transform: translateX(-4px);
+  background: rgba(156, 163, 175, 0.3);
+}
+
+.back-btn svg {
+  color: var(--pokemon-blue);
+}
+
+/* Section Title */
+.section-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--pokemon-red);
+  margin: 0 0 var(--spacing-lg) 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+}
+
+.section-icon {
+  color: var(--pokemon-yellow);
+  filter: drop-shadow(2px 2px 0 #000);
+}
+
+/* Leaderboard styles (kept for leaderboard section) */
 
 .leaderboard-content::-webkit-scrollbar {
   width: 8px;
@@ -586,7 +728,7 @@ canvas {
 }
 
 .leaderboard-header h2 {
-  font-family: "Pokemon", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 2.5rem;
   color: var(--pokemon-yellow);
   text-shadow: 
@@ -820,7 +962,7 @@ canvas {
 
 #player-name {
   color: var(--pokemon-yellow);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif; /* Police Inter partout */
   font-weight: 900;
   font-size: 1.125rem;
   text-shadow: 
@@ -828,12 +970,12 @@ canvas {
     1.5px -1.5px 0 #000,
     -1.5px 1.5px 0 #000,
     1.5px 1.5px 0 #000,
-    2px 2px 4px rgba(0, 0, 0, 0.9); /* Contour plus fin */
+    2px 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 #game-highscore-value {
   color: var(--pokemon-yellow);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif; /* Police Inter partout */
   font-weight: 900;
   font-size: 1.375rem;
   text-shadow: 
@@ -841,7 +983,7 @@ canvas {
     1.5px -1.5px 0 #000,
     -1.5px 1.5px 0 #000,
     1.5px 1.5px 0 #000,
-    2px 2px 4px rgba(0, 0, 0, 0.9); /* Contour plus fin */
+    2px 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 /* Pokéball Button */
@@ -944,6 +1086,13 @@ canvas {
     font-size: 16px; /* Augmenté pour mobile */
   }
   
+  /* Positionner le jeu vers le haut sur tablette avec espace en haut */
+  .container {
+    align-items: flex-start;
+    padding-top: 3rem !important; /* Plus d'espace en haut */
+    max-height: 100vh;
+  }
+  
   #game-score {
     font-size: 5rem !important;
     font-family: 'Inter', sans-serif !important;
@@ -1022,7 +1171,7 @@ canvas {
   }
   
   #player-name {
-    font-size: 1.375rem !important;
+    font-size: 1.25rem !important;
   }
   
   .pokeball-btn {
@@ -1127,6 +1276,8 @@ canvas {
   /* ZERO padding sur très petits écrans - Maximum d'espace */
   .container {
     padding: 0;
+    padding-top: 3rem !important; /* Mais garder espace en haut */
+    align-items: flex-start;
   }
   
   #pokedex-frame {
