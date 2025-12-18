@@ -269,7 +269,7 @@ canvas {
 /* ===== BOUTON START HARDCODÉ ===== */
 #start-button-overlay {
   position: absolute;
-  top:75%;
+  top:70%;
   left: 0;
   width: 100%;
   height: 100%;
