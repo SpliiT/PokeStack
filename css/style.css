@@ -1561,3 +1561,53 @@ canvas {
     image-rendering: -webkit-optimize-contrast;
   }
 }
+
+/* Buy Me a Coffee Button Styling */
+#bmc-container .bmc-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--spacing-md) !important;
+  width: 100% !important;
+  padding: 1.25rem 1.75rem !important;
+  background: linear-gradient(135deg, #FFCB05 0%, #FFB800 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  cursor: pointer !important;
+  transition: all 0.3s var(--ease-out-expo) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 1.25rem !important;
+  font-weight: 900 !important;
+  color: var(--text-primary) !important;
+  text-decoration: none !important;
+}
+
+#bmc-container .bmc-btn:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+#bmc-container .bmc-btn:active {
+  transform: translateY(-1px) !important;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+#bmc-container .bmc-btn span {
+  display: inline !important;
+  color: var(--text-primary) !important;
+  font-size: 1.25rem !important;
+  font-weight: 900 !important;
+}
+
+#bmc-container .bmc-btn img {
+  height: 32px !important;
+  width: 32px !important;
+  margin: 0 !important;
+}
