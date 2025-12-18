@@ -201,10 +201,6 @@ canvas {
   display: block;
   max-width: 100%;
   box-sizing: content-box;
-  /* Optimisation pour rendu net sur mobile */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
 }
 
 #game-canvas {
