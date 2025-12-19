@@ -568,10 +568,15 @@ const Game = {
     Game.elements.ui.style.display = "block";
     Game.elements.header.style.display = "flex";
     Game.elements.end.style.display = "none";
+    
+    // Initialiser currentballSize avec une valeur aléatoire pour la première balle
+    Game.currentballSize = Math.floor(rand() * 5);
+    Game.setNextballSize();
+    
     Game.elements.previewBall = Game.generateballBody(
       Game.width / 2,
       previewBallHeight,
-      0,
+      Game.currentballSize,
       { isStatic: true }
     );
     Composite.add(engine.world, Game.elements.previewBall);
